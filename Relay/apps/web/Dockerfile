@@ -12,6 +12,9 @@ COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/typescript-config ./packages/typescript-config
+COPY packages/db/prisma ./packages/db/prisma
+COPY packages/db/prisma.config.ts ./packages/db/prisma.config.ts
+COPY packages/db/tsconfig.json ./packages/db/tsconfig.json
 
 RUN pnpm install --frozen-lockfile
 
