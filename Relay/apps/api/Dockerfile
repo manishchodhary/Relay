@@ -39,4 +39,4 @@ WORKDIR /app/apps/api
 
 EXPOSE 5000
 
-CMD ["node", "dist/server.js"]
+CMD ["sh", "-c", "cd /app/packages/db && pnpm exec prisma migrate deploy --schema prisma/schema.prisma && cd /app/apps/api && node dist/server.js"]
