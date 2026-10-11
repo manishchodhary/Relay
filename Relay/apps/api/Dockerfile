@@ -20,7 +20,9 @@ COPY packages/db/prisma ./packages/db/prisma
 COPY packages/db/prisma.config.ts ./packages/db/prisma.config.ts
 COPY packages/db/tsconfig.json ./packages/db/tsconfig.json
 
-RUN pnpm install --frozen-lockfile
+# Install only the API and its workspace dependencies, not the frontend toolchain.
+# Limit concurrent registry requests to reduce peak memory during Render builds.
+RUN pnpm install --frozen-lockfile --filter api... --filter @repo/db... --network-concurrency=4
 
 COPY apps/api ./apps/api
 COPY packages/db ./packages/db
