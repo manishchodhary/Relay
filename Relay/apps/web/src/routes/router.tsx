@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import Login from "../features/auth/page/Login";
 import Register from "../features/auth/page/Register";
+import Landing from "../features/landing/Landing";
 import Home from "../features/chat/pages/Home";
 import ChatRoom from "../features/chat/pages/ChatRoom";
 import Authlayout from "../layouts/Authlayout";
@@ -12,7 +13,7 @@ function ProtectedLayout() {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to={localStorage.getItem("accessToken") ? "/home" : "/auth/login"} replace />,
+    element: <Landing />,
   },
   {
     path: "/auth",
