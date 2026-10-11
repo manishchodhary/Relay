@@ -125,3 +125,18 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+.relay-room {
+  background: #f5f7fb;
+  background-image: radial-gradient(rgba(51, 65, 85, 0.07) 0.65px, transparent 0.65px);
+  background-size: 8px 8px;
+}
+.relay-room-header { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); }
+.relay-room-messages { min-height: 0; }
+.message-enter { animation: relay-message-in 240ms ease-out both; }
+.relay-room-composer:focus-within { border-color: #7dd3fc; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12); }
+@keyframes relay-message-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
