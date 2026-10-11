@@ -1,159 +1,91 @@
-# Turborepo starter
+# Relay
 
-This Turborepo starter is maintained by the Turborepo core team.
+Relay is a real-time messaging app built with React, TypeScript, Express, Socket.IO, PostgreSQL, Prisma, and a pnpm/Turborepo monorepo.
 
-## Using this example
+## Features
 
-Run the following command:
+- Account registration and login with JWT authentication
+- Direct conversations
+- Conversation membership checks before joining a Socket.IO room or saving a message
+- Real-time message delivery
+- Message history backed by PostgreSQL and Prisma
+- Docker-based development and deployment setup
 
-```sh
-npx create-turbo@latest
+## Repository layout
+
+```text
+Relay/
+├── apps/
+│   ├── api/       # Express API and Socket.IO server
+│   └── web/       # React + Vite frontend
+├── packages/
+│   └── db/        # Prisma schema, migrations, shared database client
+├── docker-compose.yml
+├── turbo.json
+└── pnpm-workspace.yaml
 ```
 
-## What's inside?
+## Architecture
 
-This Turborepo includes the following packages/apps:
+1. React calls the Express API for authentication, conversation lists, and message history.
+2. The frontend connects to Socket.IO with its access token.
+3. Socket authentication middleware identifies the user.
+4. A user must belong to a conversation before joining its Socket.IO room.
+5. The message service checks membership again before writing to PostgreSQL, then the server broadcasts the persisted message to that room.
 
-### Apps and Packages
+Socket.IO payloads are validated server-side. Message content is limited to 500 characters, with a basic per-socket send limit to reduce accidental or abusive bursts.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `@next/eslint-plugin-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Requirements
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Node.js 24 or newer
+- pnpm 11 (as declared in the root package manifest)
+- PostgreSQL locally or through Docker
 
-### Utilities
+## Environment variables
 
-This Turborepo has some additional tools already setup for you:
+Set these in the environment files expected by your deployment. Never commit real secrets.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+| Variable | Used by | Purpose |
+| --- | --- | --- |
+| `DATABASE_URI` | API / Prisma config | PostgreSQL connection string |
+| `JWT_SECRET` | API | JWT secret of at least 32 characters |
+| `PORT` | API | HTTP port; defaults to `5000` |
+| `CLIENT_URL` | API | Exact frontend origin allowed by HTTP and Socket.IO CORS; defaults to `http://localhost:5173` |
+| `VITE_API_URL` | Web | API origin; defaults to `http://localhost:5000` |
 
-### Build
+For deployment, set `CLIENT_URL` to the frontend origin and `VITE_API_URL` to the reachable API origin. Do not append `/api` to `VITE_API_URL`.
 
-To build all apps and packages, run the following command:
+## Local development
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+From the repository root:
 
-```sh
-cd my-turborepo
-turbo build
+```bash
+pnpm install
+pnpm --filter @repo/db db:generate
+pnpm dev
 ```
 
-Without global `turbo`, use your package manager:
+Ensure PostgreSQL is running and `DATABASE_URI` points to the correct database. Apply the checked-in Prisma migrations using the migration workflow configured for your environment before testing authenticated routes.
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm exec turbo build
-pnpm exec turbo build
+Build the monorepo:
+
+```bash
+pnpm build
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Build an individual app:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```bash
+pnpm --filter api build
+pnpm --filter web build
 ```
 
-Without global `turbo`:
+The API health endpoint is available at `GET /health`.
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+## Next engineering priorities
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- Automated tests for authentication, conversation authorization, and message delivery
+- Cursor-based message pagination and sender profile details
+- Typing/presence and unread/read state
+- Structured production logging, monitoring, and CI checks
+- A shared Socket.IO adapter such as Redis when running multiple API instances
