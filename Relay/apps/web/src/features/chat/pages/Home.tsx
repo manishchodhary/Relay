@@ -83,7 +83,7 @@ export default function Home() {
     <main className="relay-paper min-h-screen overflow-hidden text-slate-950">
       <header className="relative z-10 border-b border-slate-950/10">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-          <button onClick={() => navigate("/home")} className="group flex items-center gap-3" aria-label="Relay home">
+          <button onClick={() => navigate("/")} className="group flex items-center gap-3" aria-label="Back to Relay landing page">
             <span className="relay-logo flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 text-white shadow-[4px_4px_0_#172554] transition-transform group-hover:-rotate-6">
               <MessageCircle className="h-5 w-5" strokeWidth={2.5} />
             </span>
