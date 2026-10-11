@@ -1,29 +1,22 @@
-import type { Request, Response } from "express";
+import type { RequestHandler } from "express";
 import asyncHandler from "../../utils/asyncHandler.js";
 import { createDirectConversationSchema } from "./conversation.schema.js";
 import { getOrCreateDirectConversation, listUserConversations } from "./conversation.service.js";
 
-export const createOrGetDriectCoversation = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { userId: otherUserId } = createDirectConversationSchema.parse(
-      req.body,
-    );
+export const createOrGetDriectCoversation: RequestHandler = asyncHandler(async (req, res) => {
+  const { userId: otherUserId } = createDirectConversationSchema.parse(req.body);
+  const currentUserId = req.user!.id;
 
-    const currentUserId = req.user!.id;
+  const conversation = await getOrCreateDirectConversation(currentUserId, otherUserId);
 
-    const conversation = await getOrCreateDirectConversation(
-      currentUserId,
-      otherUserId,
-    );
-    res.status(201).json({
-      success: true,
-      message: "Conversation created",
-      data: conversation,
-    });
-  },
-);
+  res.status(201).json({
+    success: true,
+    message: "Conversation created",
+    data: conversation,
+  });
+});
 
-export const listConversationsController = asyncHandler(async (req: Request, res: Response) => {
+export const listConversationsController: RequestHandler = asyncHandler(async (req, res) => {
   const conversations = await listUserConversations(req.user!.id);
   res.status(200).json({ success: true, data: conversations });
 });
