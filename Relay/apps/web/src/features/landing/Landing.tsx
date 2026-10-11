@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function Landing() {
   const navigate = useNavigate();
+  const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
   const pageRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -69,9 +70,9 @@ export default function Landing() {
           <a className="transition hover:text-sky-700" href="#the-feel">The feeling</a>
         </nav>
         <div className="landing-nav-item flex items-center gap-2 sm:gap-3">
-          <button onClick={() => navigate("/auth/login")} className="rounded-full px-3 py-2.5 text-sm font-black transition hover:bg-white/70 sm:px-5">Log in</button>
-          <button onClick={() => navigate("/auth/register")} className="group flex items-center gap-2 rounded-full border-2 border-slate-950 bg-sky-500 px-4 py-2.5 text-sm font-black text-white shadow-[3px_3px_0_#172554] transition hover:-translate-y-0.5 hover:bg-sky-600 hover:shadow-[5px_5px_0_#172554] sm:px-5">
-            Get started <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          {!isLoggedIn && <button onClick={() => navigate("/auth/login")} className="rounded-full px-3 py-2.5 text-sm font-black transition hover:bg-white/70 sm:px-5">Log in</button>}
+          <button onClick={() => navigate(isLoggedIn ? "/home" : "/auth/register")} className="group flex items-center gap-2 rounded-full border-2 border-slate-950 bg-sky-500 px-4 py-2.5 text-sm font-black text-white shadow-[3px_3px_0_#172554] transition hover:-translate-y-0.5 hover:bg-sky-600 hover:shadow-[5px_5px_0_#172554] sm:px-5">
+            {isLoggedIn ? "Open conversations" : "Get started"} <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </button>
         </div>
       </header>
@@ -89,8 +90,8 @@ export default function Landing() {
             The little messages, the late-night thoughts, the “you had to be there” moments. Keep your people close, one conversation at a time.
           </p>
           <div className="landing-actions mt-8 flex flex-wrap items-center gap-4">
-            <button onClick={() => navigate("/auth/register")} className="group flex items-center gap-3 rounded-full border-2 border-slate-950 bg-slate-950 px-6 py-4 text-sm font-black text-white transition duration-300 hover:-translate-y-1 hover:bg-sky-600 hover:shadow-[5px_5px_0_#7dd3fc]">
-              Start a conversation <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+            <button onClick={() => navigate(isLoggedIn ? "/home" : "/auth/register")} className="group flex items-center gap-3 rounded-full border-2 border-slate-950 bg-slate-950 px-6 py-4 text-sm font-black text-white transition duration-300 hover:-translate-y-1 hover:bg-sky-600 hover:shadow-[5px_5px_0_#7dd3fc]">
+              {isLoggedIn ? "Go to your conversations" : "Start a conversation"} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
             </button>
             <a href="#why-relay" className="flex items-center gap-2 px-3 py-3 text-sm font-black text-slate-600 transition hover:text-slate-950">
               Take a look <ArrowDownRight className="h-4 w-4" />
@@ -175,13 +176,13 @@ export default function Landing() {
           <span className="pointer-events-none absolute -bottom-16 -right-8 h-56 w-56 rounded-full border-[30px] border-white/15" />
           <p className="relative mb-5 text-xs font-black uppercase tracking-[0.2em] text-sky-950">Your people are one hello away</p>
           <h2 className="relative mx-auto max-w-4xl text-5xl font-black leading-[0.9] tracking-[-0.08em] text-white sm:text-6xl md:text-8xl">Make room for<br />good conversations.</h2>
-          <button onClick={() => navigate("/auth/register")} className="group relative mt-9 inline-flex items-center gap-3 rounded-full border-2 border-slate-950 bg-amber-300 px-7 py-4 text-sm font-black text-slate-950 shadow-[4px_4px_0_#172554] transition hover:-translate-y-1 hover:shadow-[7px_7px_0_#172554]">Find your people <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></button>
+          <button onClick={() => navigate(isLoggedIn ? "/home" : "/auth/register")} className="group relative mt-9 inline-flex items-center gap-3 rounded-full border-2 border-slate-950 bg-amber-300 px-7 py-4 text-sm font-black text-slate-950 shadow-[4px_4px_0_#172554] transition hover:-translate-y-1 hover:shadow-[7px_7px_0_#172554]">{isLoggedIn ? "Open conversations" : "Find your people"} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></button>
         </div>
       </section>
 
       <footer className="mx-auto flex max-w-[1440px] flex-col gap-4 border-t border-slate-950/10 px-5 py-8 text-xs font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
         <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2 self-start text-lg font-black tracking-[-0.08em] text-slate-950">relay<span className="text-sky-500">.</span><span className="text-xs font-semibold tracking-normal text-slate-500">Keep the good stuff going.</span></button>
-        <div className="flex items-center gap-5"><button onClick={() => navigate("/auth/login")} className="transition hover:text-slate-950">Log in</button><button onClick={() => navigate("/auth/register")} className="transition hover:text-slate-950">Create account</button><span>© Relay 2026</span></div>
+        <div className="flex items-center gap-5">{!isLoggedIn && <><button onClick={() => navigate("/auth/login")} className="transition hover:text-slate-950">Log in</button><button onClick={() => navigate("/auth/register")} className="transition hover:text-slate-950">Create account</button></>}{isLoggedIn && <button onClick={() => navigate("/home")} className="transition hover:text-slate-950">Your conversations</button>}<span>© Relay 2026</span></div>
       </footer>
     </main>
   );
