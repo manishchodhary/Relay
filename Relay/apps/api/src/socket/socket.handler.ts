@@ -1,75 +1,92 @@
 import type { Server } from "socket.io";
+import { z } from "zod";
 import prisma from "../lib/prisma.js";
 import type { AppSocket } from "./socket.types.js";
 import { createMessage } from "../modules/messages/messags.service.js";
 
+const conversationIdSchema = z.string().trim().min(1).max(128);
+const messagePayloadSchema = z.object({
+  conversationId: conversationIdSchema,
+  content: z.string().trim().min(1).max(500),
+}).strict();
+
+const MESSAGE_WINDOW_MS = 10_000;
+const MAX_MESSAGES_PER_WINDOW = 8;
+
 export const registerSocketHandlers = (io: Server, socket: AppSocket) => {
   const userId = socket.data.userId;
   if (!userId) {
-    console.error(`Socket ${socket.id} has no authenticated user`);
-
     socket.disconnect();
     return;
   }
 
-  console.log(`User ${userId} connected with socket ${socket.id}`);
-  socket.on("conversation:join", async (conversationId, callback) => {
+  let messageTimestamps: number[] = [];
+
+  socket.on("conversation:join", async (rawConversationId, callback) => {
+    const parsed = conversationIdSchema.safeParse(rawConversationId);
+    if (!parsed.success) {
+      callback?.({ success: false, error: "Invalid conversation ID" });
+      return;
+    }
+
     try {
-      const userId = socket.data.userId;
-
-      if (!userId) {
-        return callback({
-          success: false,
-          error: "Unauthorized",
-        });
-      }
-
+      const conversationId = parsed.data;
       const member = await prisma.conversationMember.findUnique({
-        where: {
-          userId_conversationId: {
-            userId,
-            conversationId,
-          },
-        },
+        where: { userId_conversationId: { userId, conversationId } },
+        select: { id: true },
       });
+
       if (!member) {
-        return callback({
-          success: false,
-          error: "You are not a member of this conversation",
-        });
+        callback?.({ success: false, error: "You are not a member of this conversation" });
+        return;
       }
-      const roomName = `conversation:${conversationId}`;
 
-      await socket.join(roomName);
-      socket.emit("conversation:joined", conversationId);
-      callback({
-        success: true,
-      });
+      await socket.join(`conversation:${conversationId}`);
+      callback?.({ success: true });
     } catch (error) {
-      console.error("Conversation join error:", error);
-
-      callback({
-        success: false,
-        error: "Failed to join conversation",
-      });
+      console.error("Conversation join failed", { socketId: socket.id, error });
+      callback?.({ success: false, error: "Failed to join conversation" });
     }
   });
+
   socket.on("message:send", async (payload, callback) => {
+    const parsed = messagePayloadSchema.safeParse(payload);
+    if (!parsed.success) {
+      callback?.({ success: false, error: "Message must contain a conversation ID and 1–500 characters" });
+      return;
+    }
+
+    const now = Date.now();
+    messageTimestamps = messageTimestamps.filter((timestamp) => now - timestamp < MESSAGE_WINDOW_MS);
+    if (messageTimestamps.length >= MAX_MESSAGES_PER_WINDOW) {
+      callback?.({ success: false, error: "You're sending messages too quickly. Please wait a moment." });
+      return;
+    }
+    messageTimestamps.push(now);
+
     try {
-      const message = await createMessage(userId, payload.conversationId, payload.content);
-      io.to(`conversation:${payload.conversationId}`).emit("message:new", {
+      const { conversationId, content } = parsed.data;
+      const message = await createMessage(userId, conversationId, content);
+      io.to(`conversation:${conversationId}`).emit("message:new", {
         id: message.id,
         conversationId: message.conversationId,
         senderId: message.senderId,
         content: message.content,
         createdAt: message.createdAt,
       });
-      callback({ success: true, messageId: message.id });
+      callback?.({ success: true, messageId: message.id });
     } catch (error) {
-      callback({ success: false, error: error instanceof Error ? error.message : "Unable to send message" });
+      console.error("Message send failed", { userId, socketId: socket.id, error });
+      callback?.({
+        success: false,
+        error: error instanceof Error && error.message === "You are not a member of this conversation"
+          ? error.message
+          : "Unable to send message",
+      });
     }
   });
+
   socket.on("disconnect", (reason) => {
-    console.log(`Socket disconnected: ${socket.id}`, reason);
+    console.info("Socket disconnected", { socketId: socket.id, userId, reason });
   });
 };
