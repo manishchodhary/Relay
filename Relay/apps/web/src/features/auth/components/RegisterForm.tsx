@@ -89,11 +89,12 @@ function RegisterForm() {
       setConfirmPassword("");
     } catch (cause) {
       if (axios.isAxiosError(cause)) {
-        setError(
-          cause.response?.status && cause.response.status < 500
+        const status = cause.response?.status;
+        const message =
+          status && status < 500
             ? "Unable to create your account. Check your details and try again."
-            : "Internal server error. Please try again later.",
-        );
+            : "Internal server error. Please try again later.";
+        setError(message);
       } else {
         setError("Something went wrong. Please try again later.");
       }
