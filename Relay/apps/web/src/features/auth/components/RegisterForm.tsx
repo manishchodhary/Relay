@@ -88,16 +88,14 @@ function RegisterForm() {
       setPassword("");
       setConfirmPassword("");
     } catch (cause) {
-      if (axios.isAxiosError<AuthResponse>(cause)) {
+      if (axios.isAxiosError(cause)) {
         setError(
-          cause.response?.data?.message ||
-            cause.response?.data?.error ||
-            (cause.code === "ERR_NETWORK"
-              ? "Can't reach the API. Check that your backend is running on port 5000."
-              : "Unable to create your account. Please try again."),
+          cause.response?.status && cause.response.status < 500
+            ? "Unable to create your account. Check your details and try again."
+            : "Internal server error. Please try again later.",
         );
       } else {
-        setError("Something went wrong. Please try again.");
+        setError("Something went wrong. Please try again later.");
       }
     } finally {
       setLoading(false);
