@@ -92,7 +92,7 @@ export const userService = async (userId: string) => {
 export const listUsersService = async (currentUserId: string) => {
   return prisma.user.findMany({
     where: { id: { not: currentUserId } },
-    select: { id: true, name: true, email: true },
+    select: { id: true, name: true },
     orderBy: { name: "asc" },
     take: 100,
   });

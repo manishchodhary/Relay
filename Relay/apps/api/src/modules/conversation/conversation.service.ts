@@ -72,7 +72,7 @@ export const listUserConversations = async (userId: string) => {
     include: {
       conversationMembers: {
         where: { userId: { not: userId } },
-        select: { user: { select: { id: true, name: true, email: true } } },
+        select: { user: { select: { id: true, name: true } } },
       },
       messages: {
         orderBy: { createdAt: "desc" },

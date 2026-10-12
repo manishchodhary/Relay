@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowUpRight, LogOut, MessageCircle, Plus, Search, Sparkles, Users, Zap } from "lucide-react";
 import api from "../../../lib/axios";
 
-type User = { id: string; name: string; email: string };
+type User = { id: string; name: string };
 type Conversation = {
   id: string;
   type: "DIRECT" | "GROUP";
@@ -76,7 +76,7 @@ export default function Home() {
   }
 
   const filteredUsers = users.filter((user) =>
-    (user.name + " " + user.email).toLowerCase().includes(search.toLowerCase()),
+    user.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -179,7 +179,7 @@ export default function Home() {
             </div>
             <label className="relative mb-5 block">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a name or email…" className="w-full rounded-2xl border-2 border-slate-950 bg-white py-3.5 pl-11 pr-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:-translate-y-0.5 focus:shadow-[3px_3px_0_#172554]" />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a person by name…" className="w-full rounded-2xl border-2 border-slate-950 bg-white py-3.5 pl-11 pr-4 text-sm font-medium outline-none transition placeholder:text-slate-400 focus:-translate-y-0.5 focus:shadow-[3px_3px_0_#172554]" />
             </label>
             {loading ? (
               <p className="py-8 text-center text-sm font-semibold text-slate-500">Finding your people…</p>
@@ -190,7 +190,7 @@ export default function Home() {
                 {filteredUsers.map((user, index) => (
                   <div key={user.id} className="flex items-center gap-3 rounded-2xl border border-sky-200/80 bg-white/80 p-3 transition hover:border-slate-950 hover:bg-white">
                     <span className={"flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] text-sm font-black " + avatarColors[(index + 1) % avatarColors.length]}>{user.name.slice(0, 1).toUpperCase()}</span>
-                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{user.name}</p><p className="truncate text-xs text-slate-500">{user.email}</p></div>
+                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{user.name}</p></div>
                     <button disabled={creatingFor === user.id} onClick={() => void startConversation(user)} aria-label={"Start chat with " + user.name} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-slate-950 bg-sky-500 text-white transition hover:-translate-y-0.5 hover:bg-sky-600 hover:shadow-[2px_2px_0_#172554] disabled:cursor-wait disabled:opacity-50">
                       {creatingFor === user.id ? <span className="relay-loader relay-loader-light" /> : <Plus className="h-5 w-5" />}
                     </button>
