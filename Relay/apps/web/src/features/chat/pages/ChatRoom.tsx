@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, LoaderCircle, MessageCircle, Send, Sparkles } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
-import api from "../../../lib/axios";
+import api, { apiBaseUrl } from "../../../lib/axios";
 
 type Message = { id: string; conversationId: string; senderId: string; content: string; createdAt: string | Date };
 type ApiResult<T> = { success: boolean; data: T; message?: string };
@@ -44,7 +44,7 @@ export default function ChatRoom() {
 
   useEffect(() => {
     if (!token || !conversationId) return;
-    const socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000", { auth: { token }, withCredentials: true });
+    const socket = io(apiBaseUrl, { auth: { token }, withCredentials: true });
     socketRef.current = socket;
     socket.on("connect", () => {
       socket.emit("conversation:join", conversationId, (result: { success: boolean; error?: string }) => {
