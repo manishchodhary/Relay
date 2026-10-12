@@ -58,8 +58,9 @@ function LoginFrom() {
       navigate("/home", { replace: true });
     } catch (cause) {
       if (axios.isAxiosError(cause)) {
+        const status = cause.response?.status;
         setError(
-          cause.response?.status && cause.response.status < 500
+          status && status < 500
             ? "Unable to sign in. Check your details and try again."
             : "Internal server error. Please try again later.",
         );
