@@ -5,9 +5,10 @@ import Landing from "../features/landing/Landing";
 import Home from "../features/chat/pages/Home";
 import ChatRoom from "../features/chat/pages/ChatRoom";
 import Authlayout from "../layouts/Authlayout";
+import { hasValidSession } from "../lib/session";
 
 function ProtectedLayout() {
-  return localStorage.getItem("accessToken") ? <Outlet /> : <Navigate to="/auth/login" replace />;
+  return hasValidSession() ? <Outlet /> : <Navigate to="/auth/login" replace />;
 }
 
 export const router = createBrowserRouter([

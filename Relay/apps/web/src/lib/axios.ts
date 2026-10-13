@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearSession } from "./session";
 
 function normalizeApiUrl(value: string | undefined): string {
   const cleaned = (value || "http://localhost:5000")
@@ -31,5 +32,33 @@ const api = axios.create({
   },
   withCredentials: true,
 });
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      const requestUrl = error.config?.url ?? "";
+      const path = requestUrl.split("?")[0];
+      const isAuthRequest = path.endsWith("/auth/login") || path.endsWith("/auth/register");
+
+      if (!isAuthRequest && localStorage.getItem("accessToken")) {
+        clearSession();
+        if (window.location.pathname !== "/auth/login") {
+          window.location.replace("/auth/login?reason=session-expired");
+        }
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 export default api;

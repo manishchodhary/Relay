@@ -4,6 +4,7 @@ import { Eye, EyeOff, LockKeyhole, Mail, UserRound, LoaderCircle } from "lucide-
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../../../lib/axios";
+import { saveSession } from "../../../lib/session";
 
 type AuthResponse = {
   success?: boolean;
@@ -70,15 +71,8 @@ function RegisterForm() {
 
       const result = response.data;
 
-      if (result.data?.accessToken) {
-        localStorage.setItem("accessToken", result.data.accessToken);
-      }
-
-      if (result.data?.user) {
-        localStorage.setItem("user", JSON.stringify(result.data.user));
-      }
-
       if (result.data?.accessToken && result.data.user) {
+        saveSession(result.data.accessToken, result.data.user);
         navigate("/home", { replace: true });
         return;
       }
