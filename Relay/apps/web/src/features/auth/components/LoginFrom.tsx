@@ -4,6 +4,7 @@ import { Eye, EyeOff, LockKeyhole, Mail, LoaderCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../../../lib/axios";
+import { saveSession } from "../../../lib/session";
 
 type AuthResponse = {
   success?: boolean;
@@ -53,8 +54,7 @@ function LoginFrom() {
         throw new Error("The API response did not include a user and access token.");
       }
 
-      localStorage.setItem("accessToken", result.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(result.data.user));
+      saveSession(result.data.accessToken, result.data.user);
       navigate("/home", { replace: true });
     } catch (cause) {
       if (axios.isAxiosError(cause)) {

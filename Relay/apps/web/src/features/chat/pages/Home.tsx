@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowUpRight, LogOut, MessageCircle, Plus, Search, Sparkles, Users, Zap } from "lucide-react";
 import api from "../../../lib/axios";
+import { clearSession } from "../../../lib/session";
 
 type User = { id: string; name: string };
 type Conversation = {
@@ -70,8 +71,7 @@ export default function Home() {
   }
 
   function signOut() {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
+    clearSession();
     navigate("/auth/login", { replace: true });
   }
 
