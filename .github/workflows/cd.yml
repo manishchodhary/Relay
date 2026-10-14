@@ -102,6 +102,14 @@ jobs:
           set -euo pipefail
           cd /home/ubuntu/Relay/Relay
 
+          # Clear stopped containers and unused images before pulling new layers.
+          # Keep Docker volumes intact; they may contain persistent application data.
+          df -h /
+          sudo docker system df
+          sudo docker container prune -f
+          sudo docker image prune -af
+          df -h /
+
           sudo docker pull ghcr.io/manishchodhary/relay-api:latest
           sudo docker pull ghcr.io/manishchodhary/relay-web:latest
 
