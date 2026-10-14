@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../../../lib/axios";
 import { saveSession } from "../../../lib/session";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 type AuthResponse = {
   success?: boolean;
@@ -99,6 +100,12 @@ function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-5 text-left">
+      <GoogleSignInButton />
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span>or use email</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
       <div>
         <label htmlFor="register-name" className="mb-2 block text-sm font-semibold text-slate-700">
           Full name
