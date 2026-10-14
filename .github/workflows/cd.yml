@@ -55,6 +55,7 @@ jobs:
           push: true
           build-args: |
             VITE_API_URL=https://relaymanish.duckdns.org
+            VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
           tags: ghcr.io/manishchodhary/relay-web:latest
 
       - name: Configure SSH
